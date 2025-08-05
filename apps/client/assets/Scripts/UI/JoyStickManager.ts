@@ -1,4 +1,4 @@
-import { _decorator, Component, EventTouch, Input, input, Node, UITransform, Vec3 } from 'cc';
+import { _decorator, Component, EventTouch, Input, Node, UITransform, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('JoyStickManager')
@@ -8,11 +8,16 @@ export class JoyStickManager extends Component {
     private defaultPos: Vec3 = new Vec3();
     private radius: number = 0;
 
+    public input: Vec3;
+    protected onLoad(): void {
+
+    }
+
     start() {
-        input.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
-        input.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
-        input.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
-        input.on(Input.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
+        this.node.on(Input.EventType.TOUCH_START, this.onTouchStart, this);
+        this.node.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
+        this.node.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+        this.node.on(Input.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
         this.defaultPos = this.body.position.clone();
         this.radius = this.body.getComponent(UITransform).contentSize.width / 2;
     }
@@ -25,6 +30,7 @@ export class JoyStickManager extends Component {
     onTouchEnd(e: EventTouch) {
         this.body.setPosition(this.defaultPos);
         this.stick.setPosition(0, 0);
+        this.input = Vec3.ZERO;
     }
 
     onTouchMove(e: EventTouch) {
@@ -46,12 +52,14 @@ export class JoyStickManager extends Component {
         // 设置stick的世界位置
         const stickWorldPos = new Vec3(bodyWorldPos.x + offset.x, bodyWorldPos.y + offset.y, 0);
         this.stick.setWorldPosition(stickWorldPos);
-        console.log(offset.normalize());
+        this.input = offset.normalize();
+        // console.log(offset.normalize());
     }
 
     onTouchCancel(e: EventTouch) {
         this.body.setPosition(this.defaultPos);
         this.stick.setPosition(0, 0);
+        this.input = Vec3.ZERO;
     }
 
     update(deltaTime: number) {
