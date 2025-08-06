@@ -1,4 +1,4 @@
-import { _decorator, Component, Vec3 } from 'cc';
+import { _decorator, Component, v3, Vec3 } from 'cc';
 import { IActor, InputTypeEnum } from '../../Common';
 import DataManager from '../../Global/DataManager';
 const { ccclass, property } = _decorator;
@@ -9,7 +9,7 @@ export class ActorManager extends Component {
 
     }
 
-    update(deltaTime: number) {
+    tick(deltaTime: number) {
         if (DataManager.Instance.jm?.input?.length()) {
             const { x, y } = DataManager.Instance.jm.input;
             DataManager.Instance.applyInput({
@@ -18,7 +18,7 @@ export class ActorManager extends Component {
                 direction: { x, y },
                 deltaTime,
             })
-            console.log(DataManager.Instance.state.actors[0].position);
+            // console.log(DataManager.Instance.state.actors[0].position);
         }
     }
 
@@ -27,7 +27,9 @@ export class ActorManager extends Component {
     }
 
     render(data: IActor) {
-        this.node.position = new Vec3(data.position.x, data.position.y, 0);
+        const { id, type, position, direction } = data;
+        this.node.position = new Vec3(position.x, position.y, 0);
+        this.node.setScale(v3(direction.x > 0 ? 1 : -1, 1, 1));
     }
 }
 

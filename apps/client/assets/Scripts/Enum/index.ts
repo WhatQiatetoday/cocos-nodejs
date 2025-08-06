@@ -9,4 +9,20 @@ export enum ParamsNameEnum {
   Attack = "Attack",
 }
 
-export enum EventEnum {}
+export enum EventEnum { }
+
+export enum PrefabPathEnum {
+  Map = 'Prefab/Map',
+  Actor1 = 'Prefab/Actor'
+}
+
+export enum EntityStateEnum {
+  Idle = "Idle",
+  Run = "Run",
+  Attack = "Attack",
+}
+
+export enum TexturePathEnum {
+  Actor1Idle = "texture/actor/actor1/idle",
+  Actor1Run = "texture/actor/actor1/run",
+}
