@@ -14,13 +14,14 @@ export default class DataManager extends Singleton {
   jm: JoyStickManager;
   actorMap: Map<number, ActorManager> = new Map();
   prefabMap: Map<string, Prefab> = new Map();
-  textureMap: Map<string, SpriteFrame> = new Map();
+  textureMap: Map<string, SpriteFrame[]> = new Map();
 
   state: IState = {
     actors: [
       {
         id: 1,
         type: EntityTypeEnum.Actor1,
+        weaponType: EntityTypeEnum.Weapon1,
         position: {
           x: 0,
           y: 0

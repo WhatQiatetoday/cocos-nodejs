@@ -8,6 +8,7 @@ export interface IVec2 {
 export interface IActor {
     id: number,
     type: EntityTypeEnum,
+    weaponType: EntityTypeEnum,
     position: IVec2,
     direction: IVec2
 }

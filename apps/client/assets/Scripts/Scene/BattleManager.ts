@@ -1,7 +1,7 @@
-import { _decorator, Component, instantiate, Node, Prefab } from 'cc';
+import { _decorator, Component, instantiate, Node, Prefab, SpriteFrame } from 'cc';
 import { EntityTypeEnum } from '../Common';
 import { ActorManager } from '../Entity/Actor/ActorManager';
-import { PrefabPathEnum } from '../Enum';
+import { PrefabPathEnum, TexturePathEnum } from '../Enum';
 import DataManager from '../Global/DataManager';
 import { ResourceManager } from '../Global/ResourceManager';
 import { JoyStickManager } from '../UI/JoyStickManager';
@@ -35,6 +35,12 @@ export class BattleManager extends Component {
         for (let key in PrefabPathEnum) {
             const p = ResourceManager.Instance.loadRes(PrefabPathEnum[key], Prefab).then((prefab) => {
                 DataManager.Instance.prefabMap.set(key, prefab);
+            });
+            list.push(p);
+        }
+        for (let key in TexturePathEnum) {
+            const p = ResourceManager.Instance.loadDir(TexturePathEnum[key], SpriteFrame).then((spriteFrames) => {
+                DataManager.Instance.textureMap.set(key, spriteFrames);
             });
             list.push(p);
         }
