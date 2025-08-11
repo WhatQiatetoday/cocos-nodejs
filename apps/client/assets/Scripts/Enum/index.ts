@@ -17,6 +17,7 @@ export enum PrefabPathEnum {
   Map = 'Prefab/Map',
   Actor1 = 'Prefab/Actor',
   Weapon1 = 'Prefab/Weapon1',
+  Bullet2 = 'Prefab/Bullet2',
 }
 
 export enum EntityStateEnum {
@@ -30,4 +31,6 @@ export enum TexturePathEnum {
   Actor1Run = "texture/actor/actor1/run",
   Weapon1Idle = "texture/weapon/weapon1/idle",
   Weapon1Attack = "texture/weapon/weapon1/attack",
+  Bullet2Idle = "texture/bullet/bullet2",
+
 }

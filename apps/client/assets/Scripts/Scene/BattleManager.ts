@@ -1,6 +1,7 @@
 import { _decorator, Component, instantiate, Node, Prefab, SpriteFrame } from 'cc';
 import { EntityTypeEnum } from '../Common';
 import { ActorManager } from '../Entity/Actor/ActorManager';
+import { BulletManager } from '../Entity/Bullet/BulletManager';
 import { PrefabPathEnum, TexturePathEnum } from '../Enum';
 import DataManager from '../Global/DataManager';
 import { ResourceManager } from '../Global/ResourceManager';
@@ -15,6 +16,7 @@ export class BattleManager extends Component {
 
     protected onLoad(): void {
         DataManager.Instance.jm = this.ui.getComponentInChildren(JoyStickManager);
+        DataManager.Instance.stage = this.stage;
         this.stage.destroyAllChildren();
     }
 
@@ -71,6 +73,7 @@ export class BattleManager extends Component {
 
     render() {
         this.renderActor()
+        this.renderBullet()
     }
 
     renderActor() {
@@ -86,6 +89,22 @@ export class BattleManager extends Component {
                 actorManager.init(data);
             }
             actorManager.render(data);
+        }
+    }
+
+    renderBullet() {
+        for (let data of DataManager.Instance.state.bullets) {
+            const { id, type } = data;
+            let bulletManager = DataManager.Instance.bulletMap.get(id);
+            if (!bulletManager) {
+                const prefab = DataManager.Instance.prefabMap.get(type)
+                const bullet = instantiate(prefab);
+                bullet.parent = this.stage;
+                bulletManager = bullet.addComponent(BulletManager);
+                DataManager.Instance.bulletMap.set(id, bulletManager);
+                bulletManager.init(data);
+            }
+            bulletManager.render(data);
         }
     }
 }

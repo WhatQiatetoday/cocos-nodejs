@@ -12,6 +12,8 @@ const { ccclass, property } = _decorator;
 export class ActorManager extends EntityManager {
     private wm: WeaponManager = null;
 
+    bulletType: EntityTypeEnum;
+
     start() {
 
     }
@@ -36,6 +38,7 @@ export class ActorManager extends EntityManager {
         this.fsm = this.node.addComponent(ActorStateMachine);
         this.fsm.init(data.type);
         this.state = EntityStateEnum.Idle;
+        this.bulletType = EntityTypeEnum.Bullet2;
         const weapon = instantiate(DataManager.Instance.prefabMap.get(EntityTypeEnum.Weapon1));
         weapon.parent = this.node;
         this.wm = weapon.addComponent(WeaponManager);

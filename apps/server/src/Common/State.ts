@@ -9,17 +9,37 @@ export interface IActor {
     id: number,
     type: EntityTypeEnum,
     weaponType: EntityTypeEnum,
+    bulletType: EntityTypeEnum,
     position: IVec2,
     direction: IVec2
 }
 
+export interface IBullet {
+    id: number,
+    owner: number,
+    type: EntityTypeEnum,
+    position: IVec2,
+    direction: IVec2,
+}
+
 export interface IState {
     actors: IActor[];
+    bullets: IBullet[];
+    nextBulletId: number,
 }
+
+export type IClientInput = IActorMove | IWeaponShoot;
 
 export interface IActorMove {
     id: number,
     type: InputTypeEnum.ActorMove,
     direction: IVec2,
     deltaTime: number,
+}
+
+export interface IWeaponShoot {
+    owner: number,
+    type: InputTypeEnum.WeaponShoot,
+    position: IVec2,
+    direction: IVec2,
 }
