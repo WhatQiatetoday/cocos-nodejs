@@ -1,6 +1,6 @@
-import { _decorator, instantiate, Node, UITransform } from 'cc';
+import { _decorator, Node, UITransform, Vec2 } from 'cc';
 import { EntityManager } from '../../Base/EntityManager';
-import { EntityTypeEnum, IActor, InputTypeEnum } from '../../Common';
+import { IActor, InputTypeEnum } from '../../Common';
 import { EntityStateEnum, EventEnum } from '../../Enum';
 import DataManager from '../../Global/DataManager';
 import EventManager from '../../Global/EventManager';
@@ -20,24 +20,33 @@ export class WeaponManager extends EntityManager {
         this.point = this.anchor.getChildByName("Point");
         this.owner = data.id;
 
-        this.fsm = this.node.addComponent(WeaponStateMachine);
+        this.fsm = this.body.addComponent(WeaponStateMachine);
         this.fsm.init(data.weaponType);
         this.state = EntityStateEnum.Idle;
-        const weapon = instantiate(DataManager.Instance.prefabMap.get(EntityTypeEnum.Weapon1));
-        weapon.parent = this.node;
+        // const weapon = instantiate(DataManager.Instance.prefabMap.get(EntityTypeEnum.Weapon1));
+        // weapon.parent = this.node;
 
         EventManager.Instance.on(EventEnum.WeaponShoot, this.handleWeaponShoot, this);
+        EventManager.Instance.on(EventEnum.BulletBorn, this.handleBulletBorn, this);
+    }
+
+    handleBulletBorn(owner: number) {
+        if (owner !== this.owner) {
+            return;
+        }
+        this.state = EntityStateEnum.Attack;
     }
 
     handleWeaponShoot() {
+        if (this.owner !== DataManager.Instance.myPlayerId) return;
         const pointWorldPos = this.point.worldPosition;
         const pointLocalPos = DataManager.Instance.stage.getComponent(UITransform).convertToNodeSpaceAR(pointWorldPos);
         const anchorWorldPos = this.anchor.worldPosition;
         const anchorLocalPos = DataManager.Instance.stage.getComponent(UITransform).convertToNodeSpaceAR(anchorWorldPos);
-        const direction = {
-            x: pointLocalPos.x - anchorLocalPos.x,
-            y: pointLocalPos.y - anchorLocalPos.y,
-        }
+        const direction: Vec2 = new Vec2(
+            pointLocalPos.x - anchorLocalPos.x,
+            pointLocalPos.y - anchorLocalPos.y,
+        ).normalize();
 
         DataManager.Instance.applyInput({
             owner: this.owner,
@@ -45,13 +54,12 @@ export class WeaponManager extends EntityManager {
             position: pointLocalPos,
             direction,
         })
-
         console.log(DataManager.Instance.state.bullets);
     }
 
     protected onDestroy(): void {
         EventManager.Instance.off(EventEnum.WeaponShoot, this.handleWeaponShoot, this);
-
+        EventManager.Instance.off(EventEnum.BulletBorn, this.handleBulletBorn, this);
     }
 
 }

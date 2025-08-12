@@ -1,4 +1,4 @@
-import { _decorator, instantiate, v3, Vec3 } from 'cc';
+import { _decorator, instantiate, ProgressBar, v3, Vec3 } from 'cc';
 import { EntityManager } from '../../Base/EntityManager';
 import { EntityTypeEnum, IActor, InputTypeEnum } from '../../Common';
 import { EntityStateEnum } from '../../Enum';
@@ -13,12 +13,15 @@ export class ActorManager extends EntityManager {
     private wm: WeaponManager = null;
 
     bulletType: EntityTypeEnum;
+    id: number;
+    hp: ProgressBar;
 
     start() {
 
     }
 
     tick(deltaTime: number) {
+        if (this.id != DataManager.Instance.myPlayerId) return;
         if (DataManager.Instance.jm?.input?.length()) {
             const { x, y } = DataManager.Instance.jm.input;
             DataManager.Instance.applyInput({
@@ -35,7 +38,9 @@ export class ActorManager extends EntityManager {
     }
 
     init(data: IActor) {
+        this.id = data.id;
         this.fsm = this.node.addComponent(ActorStateMachine);
+        this.hp = this.node.getComponentInChildren(ProgressBar);
         this.fsm.init(data.type);
         this.state = EntityStateEnum.Idle;
         this.bulletType = EntityTypeEnum.Bullet2;
@@ -49,6 +54,7 @@ export class ActorManager extends EntityManager {
         const { id, type, position, direction } = data;
         this.node.position = new Vec3(position.x, position.y, 0);
         this.node.setScale(v3(direction.x > 0 ? 1 : -1, 1, 1));
+        this.hp.node.setScale(v3(direction.x > 0 ? 1 : -1, 1, 1));
         // 方案一：使用 Math.asin 计算角度
         // const side = Math.sqrt(direction.x ** 2 + direction.y ** 2);
         // const rad = Math.asin(direction.y / side);
@@ -56,6 +62,7 @@ export class ActorManager extends EntityManager {
         const rad = Math.atan2(direction.y, Math.abs(direction.x));
         const angle = rad2Angle(rad);
         this.wm.node.setRotationFromEuler(new Vec3(0, 0, angle));
+        this.hp.progress = data.hp / this.hp.totalLength;
     }
 }
 

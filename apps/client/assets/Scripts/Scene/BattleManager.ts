@@ -1,5 +1,5 @@
 import { _decorator, Component, instantiate, Node, Prefab, SpriteFrame } from 'cc';
-import { EntityTypeEnum } from '../Common';
+import { EntityTypeEnum, InputTypeEnum } from '../Common';
 import { ActorManager } from '../Entity/Actor/ActorManager';
 import { BulletManager } from '../Entity/Bullet/BulletManager';
 import { PrefabPathEnum, TexturePathEnum } from '../Enum';
@@ -22,14 +22,14 @@ export class BattleManager extends Component {
 
     async start() {
         await this.loadRes();
-        this.initMap();
+        // this.initMap();
         this.shouldUpdate = true;
     }
 
     initMap() {
         const prefab = DataManager.Instance.prefabMap.get(EntityTypeEnum.Map);
-        const actor = instantiate(prefab);
-        actor.parent = this.stage;
+        const map = instantiate(prefab);
+        map.parent = this.stage;
     }
 
     loadRes() {
@@ -59,6 +59,10 @@ export class BattleManager extends Component {
 
     tick(dt: number) {
         this.tickActor(dt);
+        DataManager.Instance.applyInput({
+            type: InputTypeEnum.TimePast,
+            dt,
+        })
     }
 
     tickActor(dt: number) {
