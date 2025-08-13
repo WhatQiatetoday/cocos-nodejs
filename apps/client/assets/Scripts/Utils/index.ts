@@ -10,3 +10,11 @@ export const sortSpriteFrame = (spriteFrame: Array<SpriteFrame>) =>
 export const rad2Angle = (rad: number) => {
   return rad / Math.PI * 180;
 }
+
+export const delay = (timeout: number) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true);
+    }, timeout);
+  });
+};

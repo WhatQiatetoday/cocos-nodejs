@@ -4,8 +4,10 @@ import { ActorManager } from '../Entity/Actor/ActorManager';
 import { BulletManager } from '../Entity/Bullet/BulletManager';
 import { PrefabPathEnum, TexturePathEnum } from '../Enum';
 import DataManager from '../Global/DataManager';
+import { NetworkManager } from '../Global/NetworkManager';
 import { ResourceManager } from '../Global/ResourceManager';
 import { JoyStickManager } from '../UI/JoyStickManager';
+import { delay } from '../Utils';
 const { ccclass, property } = _decorator;
 
 @ccclass('BattleManager')
@@ -20,10 +22,19 @@ export class BattleManager extends Component {
         this.stage.destroyAllChildren();
     }
 
+    async connetServer() {
+        if (!(await NetworkManager.Instance.connet().catch(() => false))) {
+            await delay(1000);
+            await this.connetServer();
+        }
+    }
+
     async start() {
-        await this.loadRes();
+        await this.connetServer();
+        NetworkManager.Instance.sendMsg("nihao ! I am cocoscreator !");
+        // await this.loadRes();
         // this.initMap();
-        this.shouldUpdate = true;
+        // this.shouldUpdate = true;
     }
 
     initMap() {
