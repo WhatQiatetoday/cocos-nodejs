@@ -1,15 +1,39 @@
 import { WebSocketServer } from "ws";
+import { ApiMsgEnum } from "./Common";
 import { symlinkCommon } from "./Utils";
 
 symlinkCommon();
 
 const wss = new WebSocketServer({ port: 9876 });
 
+let inputs = [];
+
 wss.on("connection", (ws) => {
-    ws.on("message", (message) => {
-        console.log("收到消息:", message.toString());
+    ws.on("message", (buffer) => {
+        const str = buffer.toString();
+        try {
+            const msg = JSON.parse(str);
+            const { name, data } = msg;
+            const { frameId, input } = data;
+            inputs.push(input);
+        } catch (error) {
+            console.log(error);
+        }
+
+        setInterval(() => {
+            const temp = inputs;
+            inputs = [];
+            const obj = {
+                name: ApiMsgEnum.MsgServerSync,
+                data: {
+                    inputs: temp
+                }
+            }
+            ws.send(JSON.stringify(obj));
+            console.log("发送同步数据", obj);
+
+        }, 100);
     });
-    ws.send("你好，客户端！");
     ws.on("close", () => {
         console.log("客户端已断开连接");
     });

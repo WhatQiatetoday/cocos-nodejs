@@ -1,8 +1,9 @@
 import { _decorator, instantiate, ProgressBar, v3, Vec3 } from 'cc';
 import { EntityManager } from '../../Base/EntityManager';
 import { EntityTypeEnum, IActor, InputTypeEnum } from '../../Common';
-import { EntityStateEnum } from '../../Enum';
+import { EntityStateEnum, EventEnum } from '../../Enum';
 import DataManager from '../../Global/DataManager';
+import EventManager from '../../Global/EventManager';
 import { rad2Angle } from '../../Utils';
 import { WeaponManager } from '../Weapon/WeaponManager';
 import { ActorStateMachine } from './ActorStateMachine';
@@ -24,14 +25,19 @@ export class ActorManager extends EntityManager {
         if (this.id != DataManager.Instance.myPlayerId) return;
         if (DataManager.Instance.jm?.input?.length()) {
             const { x, y } = DataManager.Instance.jm.input;
-            DataManager.Instance.applyInput({
+            EventManager.Instance.emit(EventEnum.ClientSync, {
                 id: 1,
                 type: InputTypeEnum.ActorMove,
                 direction: { x, y },
                 deltaTime,
-            })
+            });
+            // DataManager.Instance.applyInput({
+            //     id: 1,
+            //     type: InputTypeEnum.ActorMove,
+            //     direction: { x, y },
+            //     deltaTime,
+            // })
             this.state = EntityStateEnum.Run;
-            // console.log(DataManager.Instance.state.actors[0].position);
         } else {
             this.state = EntityStateEnum.Idle;
         }

@@ -1,9 +1,10 @@
 import { _decorator, Component, instantiate, Node, Prefab, SpriteFrame } from 'cc';
-import { EntityTypeEnum, InputTypeEnum } from '../Common';
+import { ApiMsgEnum, EntityTypeEnum, IClientInput, InputTypeEnum } from '../Common';
 import { ActorManager } from '../Entity/Actor/ActorManager';
 import { BulletManager } from '../Entity/Bullet/BulletManager';
-import { PrefabPathEnum, TexturePathEnum } from '../Enum';
+import { EventEnum, PrefabPathEnum, TexturePathEnum } from '../Enum';
 import DataManager from '../Global/DataManager';
+import EventManager from '../Global/EventManager';
 import { NetworkManager } from '../Global/NetworkManager';
 import { ResourceManager } from '../Global/ResourceManager';
 import { JoyStickManager } from '../UI/JoyStickManager';
@@ -16,12 +17,6 @@ export class BattleManager extends Component {
     @property(Node) ui: Node = null;
     private shouldUpdate: boolean = false;
 
-    protected onLoad(): void {
-        DataManager.Instance.jm = this.ui.getComponentInChildren(JoyStickManager);
-        DataManager.Instance.stage = this.stage;
-        this.stage.destroyAllChildren();
-    }
-
     async connetServer() {
         if (!(await NetworkManager.Instance.connet().catch(() => false))) {
             await delay(1000);
@@ -29,12 +24,25 @@ export class BattleManager extends Component {
         }
     }
 
-    async start() {
-        await this.connetServer();
-        NetworkManager.Instance.sendMsg("nihao ! I am cocoscreator !");
-        // await this.loadRes();
-        // this.initMap();
-        // this.shouldUpdate = true;
+    async onLoad() {
+        this.clearGame();
+        await Promise.all([this.connetServer(), this.loadRes()]);
+        this.initGame();
+    }
+
+    initGame() {
+        DataManager.Instance.jm = this.ui.getComponentInChildren(JoyStickManager);
+        DataManager.Instance.stage = this.stage;
+        this.initMap();
+        this.shouldUpdate = true;
+        EventManager.Instance.on(EventEnum.ClientSync, this.handleClientSync, this);
+        NetworkManager.Instance.listenMsg(ApiMsgEnum.MsgServerSync, this.handleServerSync, this);
+    }
+
+    clearGame() {
+        this.stage.destroyAllChildren();
+        EventManager.Instance.off(EventEnum.ClientSync, this.handleClientSync, this);
+        NetworkManager.Instance.unlistenMsg(ApiMsgEnum.MsgServerSync, this.handleServerSync, this);
     }
 
     initMap() {
@@ -120,6 +128,20 @@ export class BattleManager extends Component {
                 bulletManager.init(data);
             }
             bulletManager.render(data);
+        }
+    }
+
+    handleClientSync(input: IClientInput) {
+        const msg = {
+            input,
+            frameId: DataManager.Instance.frameId++,
+        }
+        NetworkManager.Instance.sendMsg(ApiMsgEnum.MsgClientSync, JSON.stringify(msg));
+    }
+
+    handleServerSync({ inputs }: any) {
+        for (const input of inputs) {
+            DataManager.Instance.applyInput(input);
         }
     }
 }

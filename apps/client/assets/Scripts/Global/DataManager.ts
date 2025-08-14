@@ -21,6 +21,7 @@ export default class DataManager extends Singleton {
   }
 
   myPlayerId: number = 1;
+  frameId: number = 1;
   jm: JoyStickManager;
   stage: Node;
   actorMap: Map<number, ActorManager> = new Map();
