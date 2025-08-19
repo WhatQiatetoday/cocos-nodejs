@@ -5,6 +5,12 @@ interface Iitem {
     ctx: unknown
 }
 
+interface ICallApiRet {
+    success: boolean,
+    error?: Error,
+    res?: any
+}
+
 export class NetworkManager extends Singleton {
     port = 9876;
     ws: WebSocket;
@@ -36,6 +42,26 @@ export class NetworkManager extends Singleton {
             this.ws.onclose = () => {
                 reject(false);
             };
+        })
+    }
+
+    callApi(name: string, data: any): Promise<ICallApiRet> {
+        return new Promise((resolve, reject) => {
+            try {
+                const timer = setTimeout(() => {
+                    resolve({ success: false, error: new Error("Time out !") })
+                    this.unlistenMsg(name, cb, null)
+                }, 5000);
+                const cb = (res) => {
+                    this.unlistenMsg(name, cb, null)
+                    clearTimeout(timer);
+                    resolve(res)
+                }
+                this.listenMsg(name, cb, null)
+                this.sendMsg(name, data)
+            } catch (error) {
+                resolve({ success: false, error: error })
+            }
         })
     }
 
