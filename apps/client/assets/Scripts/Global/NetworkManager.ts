@@ -39,7 +39,7 @@ export class NetworkManager extends Singleton {
         })
     }
 
-    sendMsg(name: string, data: string) {
+    sendMsg(name: string, data: any) {
         const obj = { name, data }
         this.ws.send(JSON.stringify(obj));
     }

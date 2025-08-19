@@ -136,7 +136,7 @@ export class BattleManager extends Component {
             input,
             frameId: DataManager.Instance.frameId++,
         }
-        NetworkManager.Instance.sendMsg(ApiMsgEnum.MsgClientSync, JSON.stringify(msg));
+        NetworkManager.Instance.sendMsg(ApiMsgEnum.MsgClientSync, msg);
     }
 
     handleServerSync({ inputs }: any) {
