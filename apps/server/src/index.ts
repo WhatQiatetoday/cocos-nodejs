@@ -1,3 +1,4 @@
+import PlayerManager from "./Biz/PlayerManager";
 import { ApiMsgEnum } from "./Common";
 import { Connection, MyServer } from "./Core";
 import { symlinkCommon } from "./Utils";
@@ -9,7 +10,9 @@ const server = new MyServer({
 })
 
 server.setApi(ApiMsgEnum.ApiPlayerJoin, (connection: Connection, data: any) => {
-    return data + '我是服务端，我知道了'
+    const { nickname } = data
+    const player = PlayerManager.Instance.createPlayer({ nickname, connection })
+    return { player: PlayerManager.Instance.getPlayerView(player) }
 })
 
 server.start()

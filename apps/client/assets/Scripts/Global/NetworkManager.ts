@@ -12,6 +12,7 @@ interface ICallApiRet {
 }
 
 export class NetworkManager extends Singleton {
+    isConnected: boolean = false;
     port = 9876;
     ws: WebSocket;
 
@@ -23,8 +24,14 @@ export class NetworkManager extends Singleton {
 
     connet() {
         return new Promise((resolve, reject) => {
+            if (this.isConnected) {
+                resolve(true);
+                return;
+            }
+
             this.ws = new WebSocket(`ws://localhost:${this.port}`);
             this.ws.onopen = () => {
+                this.isConnected = true;
                 resolve(true);
             };
             this.ws.onmessage = (event) => {
@@ -37,9 +44,13 @@ export class NetworkManager extends Singleton {
                 }
             };
             this.ws.onerror = (error) => {
+                this.isConnected = false;
+
                 reject(false);
             };
             this.ws.onclose = () => {
+                this.isConnected = false;
+
                 reject(false);
             };
         })
