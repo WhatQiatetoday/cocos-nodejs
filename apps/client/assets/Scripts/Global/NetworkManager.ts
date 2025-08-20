@@ -1,14 +1,15 @@
 import Singleton from "../Base/Singleton";
+import { IModel } from "../Common";
 
 interface Iitem {
     cb: Function,
     ctx: unknown
 }
 
-interface ICallApiRet {
+interface ICallApiRet<T> {
     success: boolean,
     error?: Error,
-    res?: any
+    res?: T
 }
 
 export class NetworkManager extends Singleton {
@@ -56,32 +57,32 @@ export class NetworkManager extends Singleton {
         })
     }
 
-    callApi(name: string, data: any): Promise<ICallApiRet> {
+    callApi<T extends keyof IModel['api']>(name: T, data: IModel['api'][T]['req']): Promise<ICallApiRet<IModel['api'][T]['res']>> {
         return new Promise((resolve, reject) => {
             try {
                 const timer = setTimeout(() => {
                     resolve({ success: false, error: new Error("Time out !") })
-                    this.unlistenMsg(name, cb, null)
+                    this.unlistenMsg(name as any, cb, null)
                 }, 5000);
                 const cb = (res) => {
-                    this.unlistenMsg(name, cb, null)
+                    this.unlistenMsg(name as any, cb, null)
                     clearTimeout(timer);
                     resolve(res)
                 }
-                this.listenMsg(name, cb, null)
-                this.sendMsg(name, data)
+                this.listenMsg(name as any, cb, null)
+                this.sendMsg(name as any, data)
             } catch (error) {
                 resolve({ success: false, error: error })
             }
         })
     }
 
-    sendMsg(name: string, data: any) {
+    sendMsg<T extends keyof IModel['msg']>(name: T, data: IModel['msg'][T]) {
         const obj = { name, data }
         this.ws.send(JSON.stringify(obj));
     }
 
-    listenMsg(name: string, cb: Function, ctx: unknown) {
+    listenMsg<T extends keyof IModel['msg']>(name: T, cb: (args: IModel['msg'][T]) => void, ctx: unknown) {
         if (this.map.has(name)) {
             this.map.get(name).push({ cb, ctx });
         } else {
@@ -89,7 +90,7 @@ export class NetworkManager extends Singleton {
         }
     }
 
-    unlistenMsg(name: string, cb: Function, ctx: unknown) {
+    unlistenMsg<T extends keyof IModel['msg']>(name: T, cb: (args: IModel['msg'][T]) => void, ctx: unknown) {
         if (this.map.has(name)) {
             const index = this.map.get(name).findIndex((i) => i.cb === cb && i.ctx === ctx);
             index > -1 && this.map.get(name).splice(index, 1);

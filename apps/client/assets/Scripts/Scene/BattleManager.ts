@@ -1,5 +1,5 @@
 import { _decorator, Component, instantiate, Node, Prefab, SpriteFrame } from 'cc';
-import { ApiMsgEnum, EntityTypeEnum, IClientInput, InputTypeEnum } from '../Common';
+import { ApiMsgEnum, EntityTypeEnum, IClientInput, IMsgServerSync, InputTypeEnum } from '../Common';
 import { ActorManager } from '../Entity/Actor/ActorManager';
 import { BulletManager } from '../Entity/Bullet/BulletManager';
 import { EventEnum, PrefabPathEnum, TexturePathEnum } from '../Enum';
@@ -27,10 +27,7 @@ export class BattleManager extends Component {
     async onLoad() {
         this.clearGame();
         await Promise.all([this.connetServer(), this.loadRes()]);
-        const { res, error, success } = await NetworkManager.Instance.callApi(ApiMsgEnum.ApiPlayerJoin, '我是cocos')
-        if (!success) return console.log(error)
-        console.log("res:", res)
-        this.initGame();
+        // this.initGame();
     }
 
     initGame() {
@@ -142,7 +139,7 @@ export class BattleManager extends Component {
         NetworkManager.Instance.sendMsg(ApiMsgEnum.MsgClientSync, msg);
     }
 
-    handleServerSync({ inputs }: any) {
+    handleServerSync({ inputs, lastFrameId }: IMsgServerSync) {
         for (const input of inputs) {
             DataManager.Instance.applyInput(input);
         }

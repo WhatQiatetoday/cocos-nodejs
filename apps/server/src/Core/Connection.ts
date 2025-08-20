@@ -1,5 +1,6 @@
 import { EventEmitter } from "stream";
 import WebSocket from "ws";
+import { IModel } from "../Common";
 import { MyServer } from "./MyServer";
 
 interface Iitem {
@@ -9,6 +10,7 @@ interface Iitem {
 
 export class Connection extends EventEmitter {
     private msgMap: Map<string, Array<Iitem>> = new Map();
+    // playerId: number = 0;
 
     constructor(private server: MyServer, private ws: WebSocket) {
         super();
@@ -53,12 +55,12 @@ export class Connection extends EventEmitter {
         })
     }
 
-    sendMsg(name: string, data: any) {
+    sendMsg<T extends keyof IModel['msg']>(name: T, data: IModel['msg'][T]) {
         const obj = { name, data }
         this.ws.send(JSON.stringify(obj));
     }
 
-    listenMsg(name: string, cb: Function, ctx: unknown) {
+    listenMsg<T extends keyof IModel['msg']>(name: T, cb: (args: IModel['msg'][T]) => void, ctx: unknown) {
         if (this.msgMap.has(name)) {
             this.msgMap.get(name).push({ cb, ctx });
         } else {
@@ -66,7 +68,7 @@ export class Connection extends EventEmitter {
         }
     }
 
-    unlistenMsg(name: string, cb: Function, ctx: unknown) {
+    unlistenMsg<T extends keyof IModel['msg']>(name: T, cb: (args: IModel['msg'][T]) => void, ctx: unknown) {
         if (this.msgMap.has(name)) {
             const index = this.msgMap.get(name).findIndex((i) => i.cb === cb && i.ctx === ctx);
             index > -1 && this.msgMap.get(name).splice(index, 1);

@@ -39,3 +39,9 @@ export enum TexturePathEnum {
   ExplosionIdle = "texture/explosion",
 
 }
+
+export enum SceneEnum {
+  Login = "Login",
+  Battle = "Battle",
+  Hall = "Hall",
+}

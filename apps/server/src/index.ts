@@ -1,18 +1,44 @@
 import PlayerManager from "./Biz/PlayerManager";
-import { ApiMsgEnum } from "./Common";
+import { ApiMsgEnum, IApiPlayerJoinReq, IApiPlayerJoinRes, IApiPlayerListReq, IApiPlayerListRes } from "./Common";
 import { Connection, MyServer } from "./Core";
 import { symlinkCommon } from "./Utils";
 
 symlinkCommon();
 
+declare module "./Core" {
+    interface Connection {
+        playerId: number
+    }
+}
+
 const server = new MyServer({
     port: 9876,
 })
 
-server.setApi(ApiMsgEnum.ApiPlayerJoin, (connection: Connection, data: any) => {
+server.on("connection", (connection: Connection) => {
+    console.log("来人了", server.connections.size)
+})
+
+server.on("disconnection", (connection: Connection) => {
+    console.log("有人走了", server.connections.size)
+    if (connection.playerId) {
+        PlayerManager.Instance.removePlayer(connection.playerId)
+    }
+    PlayerManager.Instance.syncPlayers()
+    console.log("PlayerManager.Instance.players.size", PlayerManager.Instance.players.size)
+})
+
+
+server.setApi(ApiMsgEnum.ApiPlayerJoin, (connection: Connection, data: IApiPlayerJoinReq): IApiPlayerJoinRes => {
     const { nickname } = data
     const player = PlayerManager.Instance.createPlayer({ nickname, connection })
+    connection.playerId = player.id
+    PlayerManager.Instance.syncPlayers()
     return { player: PlayerManager.Instance.getPlayerView(player) }
+})
+
+server.setApi(ApiMsgEnum.ApiPlayerList, (connection: Connection, data: IApiPlayerListReq): IApiPlayerListRes => {
+    return { list: PlayerManager.Instance.getPlayersView() }
 })
 
 server.start()
