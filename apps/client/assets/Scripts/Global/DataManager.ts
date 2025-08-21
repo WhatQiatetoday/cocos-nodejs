@@ -1,6 +1,6 @@
 import { Node, Prefab, SpriteFrame } from "cc";
 import Singleton from "../Base/Singleton";
-import { EntityTypeEnum, IBullet, IClientInput, InputTypeEnum, IState } from "../Common";
+import { EntityTypeEnum, IBullet, IClientInput, InputTypeEnum, IRoom, IState } from "../Common";
 import { ActorManager } from "../Entity/Actor/ActorManager";
 import { BulletManager } from "../Entity/Bullet/BulletManager";
 import { EventEnum } from "../Enum";
@@ -22,6 +22,7 @@ export default class DataManager extends Singleton {
 
   myPlayerId: number = 1;
   frameId: number = 1;
+  roomInfo: IRoom
   jm: JoyStickManager;
   stage: Node;
   actorMap: Map<number, ActorManager> = new Map();

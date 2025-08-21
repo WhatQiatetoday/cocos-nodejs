@@ -44,4 +44,6 @@ export enum SceneEnum {
   Login = "Login",
   Battle = "Battle",
   Hall = "Hall",
+  Room = "Room",
+
 }

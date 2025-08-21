@@ -21,4 +21,9 @@ export enum ApiMsgEnum {
 
     MsgClientSync = "MsgClientSync",
     MsgServerSync = "MsgServerSync",
+
+    ApiRoomCreate = "ApiRoomCreate",
+
+    ApiRoomList = "ApiRoomList",
+    MsgRoomList = "MsgRoomList"
 }
