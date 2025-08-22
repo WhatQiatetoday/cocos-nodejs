@@ -1,7 +1,8 @@
 import { _decorator, Component, director, instantiate, Node, Prefab } from 'cc';
 import { ApiMsgEnum, IApiPlayerListRes, IApiRoomListRes } from '../Common';
-import { SceneEnum } from '../Enum';
+import { EventEnum, SceneEnum } from '../Enum';
 import DataManager from '../Global/DataManager';
+import EventManager from '../Global/EventManager';
 import { NetworkManager } from '../Global/NetworkManager';
 import { PlayerManager } from '../UI/PlayerManager';
 import { RoomManager } from '../UI/RoomManager';
@@ -17,7 +18,7 @@ export class HallManager extends Component {
     protected onLoad(): void {
         NetworkManager.Instance.listenMsg(ApiMsgEnum.MsgPlayerList, this.renderPlayer, this);
         NetworkManager.Instance.listenMsg(ApiMsgEnum.MsgRoomList, this.renderRoom, this);
-
+        EventManager.Instance.on(EventEnum.RoomJoin, this.handleJoinRoom, this)
     }
 
     protected start(): void {
@@ -30,6 +31,8 @@ export class HallManager extends Component {
     protected onDestroy(): void {
         NetworkManager.Instance.unlistenMsg(ApiMsgEnum.MsgPlayerList, this.renderPlayer, this);
         NetworkManager.Instance.unlistenMsg(ApiMsgEnum.MsgRoomList, this.renderRoom, this);
+        EventManager.Instance.off(EventEnum.RoomJoin, this.handleJoinRoom, this)
+
     }
 
     async getPlayers() {
@@ -82,6 +85,14 @@ export class HallManager extends Component {
             }
             item.getComponent(RoomManager).init(list[i])
         }
+    }
+
+    async handleJoinRoom(rid: number) {
+        const { res, error, success } = await NetworkManager.Instance.callApi(ApiMsgEnum.ApiRoomJoin, { rid })
+        if (!success) return console.log(error)
+        DataManager.Instance.roomInfo = res.room
+        console.log("Datamanager.Instance.roomInfo:", DataManager.Instance.roomInfo)
+        director.loadScene(SceneEnum.Room)
     }
 
     update(deltaTime: number) {

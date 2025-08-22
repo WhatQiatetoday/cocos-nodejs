@@ -37,3 +37,24 @@ export interface IApiRoomListReq {
 export interface IApiRoomListRes {
     list: IRoom[]
 }
+
+export interface IApiRoomJoinReq {
+    rid: number
+}
+export interface IApiRoomJoinRes {
+    room: IRoom
+}
+
+export interface IApiRoomLeaveReq {
+
+}
+export interface IApiRoomLeaveRes {
+
+}
+
+export interface IApiGameStartReq {
+
+}
+export interface IApiGameStartRes {
+
+}

@@ -1,6 +1,6 @@
 import PlayerManager from "./Biz/PlayerManager";
 import RoomManager from "./Biz/RoomManager";
-import { ApiMsgEnum, IApiPlayerJoinReq, IApiPlayerJoinRes, IApiPlayerListReq, IApiPlayerListRes, IApiRoomCreateReq, IApiRoomCreateRes, IApiRoomListReq, IApiRoomListRes } from "./Common";
+import { ApiMsgEnum, IApiGameStartReq, IApiGameStartRes, IApiPlayerJoinReq, IApiPlayerJoinRes, IApiPlayerListReq, IApiPlayerListRes, IApiRoomCreateReq, IApiRoomCreateRes, IApiRoomJoinReq, IApiRoomJoinRes, IApiRoomLeaveReq, IApiRoomLeaveRes, IApiRoomListReq, IApiRoomListRes } from "./Common";
 import { Connection, MyServer } from "./Core";
 import { symlinkCommon } from "./Utils";
 
@@ -60,6 +60,66 @@ server.setApi(ApiMsgEnum.ApiRoomCreate, (connection: Connection, data: IApiRoomC
 
 server.setApi(ApiMsgEnum.ApiRoomList, (connection: Connection, data: IApiRoomListReq): IApiRoomListRes => {
     return { list: RoomManager.Instance.getRoomsView() }
+})
+
+server.setApi(ApiMsgEnum.ApiRoomJoin, (connection: Connection, { rid }: IApiRoomJoinReq): IApiRoomJoinRes => {
+    if (connection.playerId) {
+        const room = RoomManager.Instance.joinRoom(rid, connection.playerId)
+        if (room) {
+            RoomManager.Instance.syncRooms()
+            RoomManager.Instance.syncRoom(rid)
+            PlayerManager.Instance.syncPlayers()
+            return { room: RoomManager.Instance.getRoomView(room) }
+        } else {
+            throw new Error("房间不存在")
+        }
+    } else {
+        throw new Error("未登录")
+    }
+})
+
+server.setApi(ApiMsgEnum.ApiRoomLeave, (connection: Connection, { }: IApiRoomLeaveReq): IApiRoomLeaveRes => {
+    if (connection.playerId) {
+        const player = PlayerManager.Instance.idMapPlayer.get(connection.playerId)
+        if (player) {
+            const rid = player.rid
+            if (rid) {
+                RoomManager.Instance.leaveRoom(rid, player.id)
+                RoomManager.Instance.syncRooms()
+                RoomManager.Instance.syncRoom(rid)
+                PlayerManager.Instance.syncPlayers()
+                return {}
+            } else {
+                throw new Error("玩家不在房间")
+            }
+        } else {
+            throw new Error("玩家不存在")
+        }
+    } else {
+        throw new Error("未登录")
+    }
+})
+
+server.setApi(ApiMsgEnum.ApiGameStart, (connection: Connection, { }: IApiGameStartReq): IApiGameStartRes => {
+    if (connection.playerId) {
+        const player = PlayerManager.Instance.idMapPlayer.get(connection.playerId)
+        if (player) {
+            const rid = player.rid
+            if (rid) {
+                RoomManager.Instance.startRoom(rid)
+                RoomManager.Instance.syncRooms()
+                RoomManager.Instance.syncRoom(rid)
+                PlayerManager.Instance.syncPlayers()
+                return {}
+            } else {
+                throw new Error("玩家不在房间")
+            }
+        } else {
+            throw new Error("玩家不存在")
+        }
+    } else {
+        throw new Error("未登录")
+    }
 })
 
 server.start()

@@ -1,14 +1,22 @@
 import { _decorator, Component, Label } from 'cc';
 import { IRoom } from '../Common';
+import { EventEnum } from '../Enum';
+import EventManager from '../Global/EventManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('RoomManager')
 export class RoomManager extends Component {
+    id: number
+
     init({ id, players }: IRoom) {
-        this.node.getComponent(Label).string = id.toString()
+        this.id = id
+        this.node.getComponent(Label).string = `房间ID：${id}`
         this.node.active = true;
     }
 
+    handleClick() {
+        EventManager.Instance.emit(EventEnum.RoomJoin, this.id)
+    }
 
     start() {
 

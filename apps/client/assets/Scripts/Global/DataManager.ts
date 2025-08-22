@@ -1,6 +1,6 @@
 import { Node, Prefab, SpriteFrame } from "cc";
 import Singleton from "../Base/Singleton";
-import { EntityTypeEnum, IBullet, IClientInput, InputTypeEnum, IRoom, IState } from "../Common";
+import { IBullet, IClientInput, InputTypeEnum, IRoom, IState } from "../Common";
 import { ActorManager } from "../Entity/Actor/ActorManager";
 import { BulletManager } from "../Entity/Bullet/BulletManager";
 import { EventEnum } from "../Enum";
@@ -32,36 +32,36 @@ export default class DataManager extends Singleton {
 
   state: IState = {
     actors: [
-      {
-        id: 1,
-        hp: 30,
-        type: EntityTypeEnum.Actor1,
-        weaponType: EntityTypeEnum.Weapon1,
-        bulletType: EntityTypeEnum.Bullet1,
-        position: {
-          x: 0,
-          y: 0
-        },
-        direction: {
-          x: 1,
-          y: 1
-        }
-      },
-      {
-        id: 2,
-        hp: 30,
-        type: EntityTypeEnum.Actor1,
-        weaponType: EntityTypeEnum.Weapon1,
-        bulletType: EntityTypeEnum.Bullet1,
-        position: {
-          x: 150,
-          y: 150
-        },
-        direction: {
-          x: -1,
-          y: 1
-        }
-      }
+      //   {
+      //     id: 1,
+      //     hp: 30,
+      //     type: EntityTypeEnum.Actor1,
+      //     weaponType: EntityTypeEnum.Weapon1,
+      //     bulletType: EntityTypeEnum.Bullet1,
+      //     position: {
+      //       x: 0,
+      //       y: 0
+      //     },
+      //     direction: {
+      //       x: 1,
+      //       y: 1
+      //     }
+      //   },
+      //   {
+      //     id: 2,
+      //     hp: 30,
+      //     type: EntityTypeEnum.Actor1,
+      //     weaponType: EntityTypeEnum.Weapon1,
+      //     bulletType: EntityTypeEnum.Bullet1,
+      //     position: {
+      //       x: 150,
+      //       y: 150
+      //     },
+      //     direction: {
+      //       x: -1,
+      //       y: 1
+      //     }
+      //   }
     ],
     bullets: [],
     nextBulletId: 1
