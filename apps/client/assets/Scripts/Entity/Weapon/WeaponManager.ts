@@ -48,13 +48,19 @@ export class WeaponManager extends EntityManager {
             pointLocalPos.y - anchorLocalPos.y,
         ).normalize();
 
-        DataManager.Instance.applyInput({
+        EventManager.Instance.emit(EventEnum.ClientSync, {
             owner: this.owner,
             type: InputTypeEnum.WeaponShoot,
             position: pointLocalPos,
             direction,
-        })
-        console.log(DataManager.Instance.state.bullets);
+        });
+        // DataManager.Instance.applyInput({
+        //     owner: this.owner,
+        //     type: InputTypeEnum.WeaponShoot,
+        //     position: pointLocalPos,
+        //     direction,
+        // })
+        // console.log(DataManager.Instance.state.bullets);
     }
 
     protected onDestroy(): void {
