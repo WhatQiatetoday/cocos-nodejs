@@ -9,6 +9,7 @@ import { NetworkManager } from '../Global/NetworkManager';
 import { ResourceManager } from '../Global/ResourceManager';
 import { JoyStickManager } from '../UI/JoyStickManager';
 import { delay } from '../Utils';
+import { ObjectPoolManager } from '../Global/ObjectPoolManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('BattleManager')
@@ -120,10 +121,10 @@ export class BattleManager extends Component {
             const { id, type } = data;
             let bulletManager = DataManager.Instance.bulletMap.get(id);
             if (!bulletManager) {
-                const prefab = DataManager.Instance.prefabMap.get(type)
-                const bullet = instantiate(prefab);
-                bullet.parent = this.stage;
-                bulletManager = bullet.addComponent(BulletManager);
+                // const prefab = DataManager.Instance.prefabMap.get(type)
+                const bullet = ObjectPoolManager.Instance.get(type)
+                // bullet.parent = this.stage;
+                bulletManager = bullet.getComponent(BulletManager) || bullet.addComponent(BulletManager);
                 DataManager.Instance.bulletMap.set(id, bulletManager);
                 bulletManager.init(data);
             }

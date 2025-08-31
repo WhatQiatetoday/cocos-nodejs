@@ -7,6 +7,7 @@ import EventManager from '../../Global/EventManager';
 import { rad2Angle } from '../../Utils';
 import { ExplosionManager } from '../Explosion/ExplosionManager';
 import { BulletStateMachine } from './BulletStateMachine';
+import { ObjectPoolManager } from '../../Global/ObjectPoolManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('BulletManager')
@@ -31,12 +32,12 @@ export class BulletManager extends EntityManager {
 
     handleExplosionBorn(id: number, pos: IVec2) {
         if (id != this.id) return;
-        const prefab = DataManager.Instance.prefabMap.get(EntityTypeEnum.Explosion);
-        const explosion = instantiate(prefab);
-        explosion.parent = DataManager.Instance.stage;
-        const explosionManager = explosion.addComponent(ExplosionManager);
+        // const prefab = DataManager.Instance.prefabMap.get(EntityTypeEnum.Explosion);
+        const explosion = ObjectPoolManager.Instance.get(EntityTypeEnum.Explosion);
+        // explosion.parent = DataManager.Instance.stage;
+        const explosionManager = explosion.getComponent(ExplosionManager) || explosion.addComponent(ExplosionManager);
         explosionManager.init(EntityTypeEnum.Explosion, pos);
-        this.node.destroy();
+        ObjectPoolManager.Instance.ret(this.node);
         EventManager.Instance.off(EventEnum.ExplosionBorn, this.handleExplosionBorn, this);
         DataManager.Instance.bulletMap.delete(this.id);
     }

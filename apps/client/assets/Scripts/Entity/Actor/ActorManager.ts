@@ -57,6 +57,17 @@ export class ActorManager extends EntityManager {
     }
 
     render(data: IActor) {
+        this.renderPos(data);
+        this.renderDire(data);
+        this.renderHP(data);
+    }
+
+    renderPos(data: IActor) {
+        const { id, type, position, direction } = data;
+        this.node.position = new Vec3(position.x, position.y, 0);
+    }
+
+    renderDire(data: IActor) {
         const { id, type, position, direction } = data;
         this.node.position = new Vec3(position.x, position.y, 0);
         this.node.setScale(v3(direction.x > 0 ? 1 : -1, 1, 1));
@@ -68,9 +79,13 @@ export class ActorManager extends EntityManager {
         const rad = Math.atan2(direction.y, Math.abs(direction.x));
         const angle = rad2Angle(rad);
         this.wm.node.setRotationFromEuler(new Vec3(0, 0, angle));
+    }
+
+    renderHP(data: IActor) {
         this.hp.progress = data.hp / this.hp.totalLength;
     }
 }
+
 
 
 // 我来用更直观的方式解释为什么 atan2 会导致武器翻转！
