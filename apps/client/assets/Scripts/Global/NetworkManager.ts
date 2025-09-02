@@ -77,8 +77,11 @@ export class NetworkManager extends Singleton {
         })
     }
 
-    sendMsg<T extends keyof IModel['msg']>(name: T, data: IModel['msg'][T]) {
+    async sendMsg<T extends keyof IModel['msg']>(name: T, data: IModel['msg'][T]) {
         const obj = { name, data }
+        // 模拟延时
+        // await delay(2000);
+
         this.ws.send(JSON.stringify(obj));
     }
 

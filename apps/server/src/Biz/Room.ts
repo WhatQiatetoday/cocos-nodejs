@@ -10,7 +10,7 @@ export class Room {
 
     pendingInput: IClientInput[] = []
     lastTime: number
-
+    lastPlayerFrameIdMap: Map<number, number> = new Map()
 
 
     constructor(rid: number) {
@@ -69,11 +69,12 @@ export class Room {
         }, 100);
         const timer2 = setInterval(() => {
             this.timePast()
-        }, 16);
+        }, 100);
     }
 
     getClientMsg(connection: Connection, { input, frameId }: IMsgClientSync) {
         this.pendingInput.push(input)
+        this.lastPlayerFrameIdMap.set(connection.playerId, frameId)
     }
 
     sendServerMsg() {
@@ -81,7 +82,7 @@ export class Room {
         this.pendingInput = []
         for (const player of this.players) {
             player.connection.sendMsg(ApiMsgEnum.MsgServerSync, {
-                lastFrameId: 0,
+                lastFrameId: this.lastPlayerFrameIdMap.get(player.id) ?? 0,
                 inputs
             })
         }

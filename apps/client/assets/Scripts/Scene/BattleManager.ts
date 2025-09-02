@@ -1,15 +1,15 @@
 import { _decorator, Component, instantiate, Node, Prefab, SpriteFrame } from 'cc';
-import { ApiMsgEnum, EntityTypeEnum, IClientInput, IMsgServerSync, InputTypeEnum } from '../Common';
+import { ApiMsgEnum, EntityTypeEnum, IClientInput, IMsgClientSync, IMsgServerSync, InputTypeEnum } from '../Common';
 import { ActorManager } from '../Entity/Actor/ActorManager';
 import { BulletManager } from '../Entity/Bullet/BulletManager';
 import { EventEnum, PrefabPathEnum, TexturePathEnum } from '../Enum';
 import DataManager from '../Global/DataManager';
 import EventManager from '../Global/EventManager';
 import { NetworkManager } from '../Global/NetworkManager';
+import { ObjectPoolManager } from '../Global/ObjectPoolManager';
 import { ResourceManager } from '../Global/ResourceManager';
 import { JoyStickManager } from '../UI/JoyStickManager';
-import { delay } from '../Utils';
-import { ObjectPoolManager } from '../Global/ObjectPoolManager';
+import { deepClone, delay } from '../Utils';
 const { ccclass, property } = _decorator;
 
 @ccclass('BattleManager')
@@ -17,6 +17,7 @@ export class BattleManager extends Component {
     @property(Node) stage: Node = null;
     @property(Node) ui: Node = null;
     private shouldUpdate: boolean = false;
+    private pendingMsg: IMsgClientSync[] = [];
 
     async connetServer() {
         if (!(await NetworkManager.Instance.connet().catch(() => false))) {
@@ -138,11 +139,25 @@ export class BattleManager extends Component {
             frameId: DataManager.Instance.frameId++,
         }
         NetworkManager.Instance.sendMsg(ApiMsgEnum.MsgClientSync, msg);
+
+        // 客户端预测
+        if (input.type === InputTypeEnum.ActorMove) {
+            DataManager.Instance.applyInput(input);
+            this.pendingMsg.push(msg);
+        }
     }
 
     handleServerSync({ inputs, lastFrameId }: IMsgServerSync) {
+        // 客户端回滚
+        DataManager.Instance.state = DataManager.Instance.lastState;
         for (const input of inputs) {
             DataManager.Instance.applyInput(input);
+        }
+
+        DataManager.Instance.lastState = deepClone(DataManager.Instance.state);
+        this.pendingMsg = this.pendingMsg.filter((msg) => msg.frameId > lastFrameId);
+        for (const msg of this.pendingMsg) {
+            DataManager.Instance.applyInput(msg.input);
         }
     }
 }

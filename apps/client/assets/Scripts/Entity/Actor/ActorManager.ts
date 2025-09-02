@@ -1,4 +1,4 @@
-import { _decorator, instantiate, ProgressBar, v3, Vec3 } from 'cc';
+import { _decorator, instantiate, ProgressBar, tween, Tween, v3, Vec3 } from 'cc';
 import { EntityManager } from '../../Base/EntityManager';
 import { EntityTypeEnum, IActor, InputTypeEnum } from '../../Common';
 import { EntityStateEnum, EventEnum } from '../../Enum';
@@ -12,6 +12,8 @@ const { ccclass, property } = _decorator;
 @ccclass('ActorManager')
 export class ActorManager extends EntityManager {
     private wm: WeaponManager = null;
+    private targetPos: Vec3
+    private tw: Tween<unknown>
 
     bulletType: EntityTypeEnum;
     id: number;
@@ -37,9 +39,9 @@ export class ActorManager extends EntityManager {
             //     direction: { x, y },
             //     deltaTime,
             // })
-            this.state = EntityStateEnum.Run;
+            // this.state = EntityStateEnum.Run;
         } else {
-            this.state = EntityStateEnum.Idle;
+            // this.state = EntityStateEnum.Idle;
         }
     }
 
@@ -49,6 +51,8 @@ export class ActorManager extends EntityManager {
         this.hp = this.node.getComponentInChildren(ProgressBar);
         this.fsm.init(data.type);
         this.state = EntityStateEnum.Idle;
+        this.node.active = false;
+        this.targetPos = undefined;
         this.bulletType = EntityTypeEnum.Bullet2;
         const weapon = instantiate(DataManager.Instance.prefabMap.get(EntityTypeEnum.Weapon1));
         weapon.parent = this.node;
@@ -65,6 +69,22 @@ export class ActorManager extends EntityManager {
     renderPos(data: IActor) {
         const { id, type, position, direction } = data;
         this.node.position = new Vec3(position.x, position.y, 0);
+        const newPos = new Vec3(position.x, position.y);
+        if (!this.targetPos) {
+            this.node.active = true;
+            this.node.setPosition(newPos);
+            this.targetPos = new Vec3(newPos);
+        } else if (!this.targetPos.equals(newPos)) {
+            this.tw?.stop();
+            this.node.setPosition(this.targetPos);
+            this.targetPos.set(newPos);
+            this.state = EntityStateEnum.Run;
+            this.tw = tween(this.node).to(0.1, {
+                position: this.targetPos
+            }).call(() => {
+                this.state = EntityStateEnum.Idle;
+            }).start()
+        }
     }
 
     renderDire(data: IActor) {

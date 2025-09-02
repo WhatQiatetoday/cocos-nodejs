@@ -4,6 +4,7 @@ import { SceneEnum } from '../Enum';
 import DataManager from '../Global/DataManager';
 import { NetworkManager } from '../Global/NetworkManager';
 import { PlayerManager } from '../UI/PlayerManager';
+import { deepClone } from '../Utils';
 const { ccclass, property } = _decorator;
 
 @ccclass('RoomManager')
@@ -59,6 +60,7 @@ export class RoomManager extends Component {
     // 后端返回开始游戏
     handleGameStart({ state }: IMsgGameStart) {
         DataManager.Instance.state = state
+        DataManager.Instance.lastState = deepClone(state)
         director.loadScene(SceneEnum.Battle)
     }
 
