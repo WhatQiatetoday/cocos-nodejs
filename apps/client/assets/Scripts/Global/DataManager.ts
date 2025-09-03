@@ -1,6 +1,6 @@
 import { Node, Prefab, SpriteFrame } from "cc";
 import Singleton from "../Base/Singleton";
-import { IBullet, IClientInput, InputTypeEnum, IRoom, IState } from "../Common";
+import { IBullet, IClientInput, InputTypeEnum, IRoom, IState, randomBySeed } from "../Common";
 import { ActorManager } from "../Entity/Actor/ActorManager";
 import { BulletManager } from "../Entity/Bullet/BulletManager";
 import { EventEnum } from "../Enum";
@@ -65,7 +65,8 @@ export default class DataManager extends Singleton {
       //   }
     ],
     bullets: [],
-    nextBulletId: 1
+    nextBulletId: 1,
+    seed: 1
   }
 
   applyInput(input: IClientInput) {
@@ -103,7 +104,10 @@ export default class DataManager extends Singleton {
             if ((actor.position.y - bullet.position.y) ** 2 + (actor.position.x - bullet.position.x) ** 2 <= (ACTOR_RADIUS + BULLET_RADIUS) ** 2) {
               EventManager.Instance.emit(EventEnum.ExplosionBorn, bullet.id, bullet.position);
               bullets.splice(i, 1);
-              actor.hp -= BULLET_DAMAGE;
+              const random = randomBySeed(this.state.seed);
+              this.state.seed = random;
+              const damage = random / 233280 >= 0.5 ? BULLET_DAMAGE * 2 : BULLET_DAMAGE;
+              actor.hp -= damage;
               isCollide = true;
               break;
             }
